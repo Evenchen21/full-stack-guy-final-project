@@ -1,0 +1,39 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "firstName": "Guy",
+      "lastName": "Even-Chen",
+      "email": "admin@icloud.com",
+      "password": "Admin123!",
+      "isAdmin": true,
+      "isLoggedIn": false
+    }
+  ],
+  "cards": [
+    {
+      "id": 1,
+      "title": "Spaghetti Carbonara",
+      "description": "A classic Italian pasta dish made with eggs, cheese, pancetta, and pepper.",
+      "ingredients": [
+        "200g spaghetti",
+        "100g pancetta",
+        "2 large eggs",
+        "50g Pecorino Romano cheese",
+        "50g Parmesan cheese",
+        "Freshly ground black pepper",
+        "Salt"
+      ],
+      "instructions": [
+        "Cook the spaghetti in a large pot of salted boiling water until al dente.",
+        "While the pasta is cooking, heat a large skillet over medium heat and cook the pancetta until crispy. Remove from heat and set aside.",
+        "In a bowl, whisk together the eggs, Pecorino Romano, Parmesan, and a generous amount of black pepper.",
+        "Once the pasta is cooked, reserve a cup of the pasta water and then drain the pasta.",
+        "Add the hot pasta to the skillet with the pancetta and toss to combine.",
+        "Remove the skillet from heat and quickly pour the egg and cheese mixture over the pasta, tossing vigorously to create a creamy sauce. If the sauce is too thick, add a little reserved pasta water to loosen it up.",
+        "Serve immediately, garnished with extra cheese and black pepper."
+      ]
+    }
+  ]
+}
+// for testing purposes only, not used in production //

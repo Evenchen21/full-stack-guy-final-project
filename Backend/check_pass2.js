@@ -1,0 +1,1 @@
+const bcrypt=require("bcrypt"); (async()=>{ const hash="$2b$10$yvNs9Zu3ecBgz8Lsf/db7.ZpSX1/.TZLLUEim22uEjTclmnWUhiTW"; const pass="Admin123!"; const match=await bcrypt.compare(pass, hash); console.log("Match:", match); })();

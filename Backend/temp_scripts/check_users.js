@@ -1,0 +1,1 @@
+require("dotenv").config({path: "../.env"}); const mongoose = require("mongoose"); const User = require("../models/users"); (async () => { try { await mongoose.connect(process.env.DB_HOST); const users = await User.find({}, "email password isAdmin"); console.log("Users in DB:", users); await mongoose.disconnect(); } catch(e) { console.error(e); } })();
