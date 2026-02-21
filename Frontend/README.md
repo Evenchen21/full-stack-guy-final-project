@@ -1,46 +1,99 @@
-# Getting Started with Create React App
+# FSProject Frontend (React + TypeScript)
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Project Description
+
+This is the frontend application of FSProject. It is built with React and TypeScript, and communicates with a backend REST API for authentication, user profile management, and recipe/card operations.
+
+## Main Features
+
+- User authentication (login/register/logout)
+- Token and userId persistence using `localStorage`
+- Navigation with React Router
+- Pages: Home, Login, Register, About, Profile, Forgot Password
+- Recipe/Card flows (fetch/create/update/delete through API services)
+- Global toast notifications (`react-toastify`)
+- Auth header injection (`x-auth-token` and `Authorization: Bearer ...`) via Axios interceptor
+
+## Tech Stack
+
+- React 19
+- TypeScript
+- React Router DOM
+- Axios
+- React Bootstrap
+- Formik + Yup
+- React Toastify
+
+## Folder Structure (Frontend)
+
+- `Frontend/src/App.tsx` — app shell and routes
+- `Frontend/src/context/AuthContext.tsx` — auth state provider (`token`, `userId`, `login`, `logout`)
+- `Frontend/src/services/axios.ts` — axios instance + request/response interceptors
+- `Frontend/src/services/userService.ts` — user/auth API calls
+- `Frontend/src/services/RecipeService.ts` — card/recipe API calls
+- `Frontend/src/components/` — UI pages and feature components
+
+## Routes
+
+- `/` and `/home`
+- `/login`
+- `/register`
+- `/about`
+- `/profile`
+- `/forgot-password`
+
+## Prerequisites
+
+- Node.js (v18+ recommended)
+- npm
+- Running backend API server
+
+## Environment Variables
+
+Create `Frontend/.env` and set:
+
+```env
+REACT_APP_API_USERS=http://localhost:8000/api/users
+REACT_APP_API_CARDS=http://localhost:8000/api/cards
+```
+
+Notes:
+
+- `REACT_APP_API_USERS` is used by `userService.ts`
+- `REACT_APP_API_CARDS` is used by `RecipeService.ts`
+- If `REACT_APP_API_CARDS` is missing, the code fallback is `http://localhost:9000/api/cards`
+
+## Installation & Run
+
+From the `Frontend/` directory:
+
+1. Install dependencies:
+   - `npm install`
+2. Start development server:
+   - `npm start`
+
+App default URL: `http://localhost:3000`
 
 ## Available Scripts
 
-In the project directory, you can run:
+From `Frontend/`:
 
-### `npm start`
+- `npm start` — run development server
+- `npm run build` — create production build
+- `npm test` — run tests
+- `npm run eject` — eject CRA configuration (irreversible)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## API Integration Summary
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+1. UI components call service functions in `src/services/`.
+2. Service functions send HTTP requests using shared axios instance.
+3. Axios interceptor automatically attaches auth token from `localStorage`.
+4. Backend validates request and returns JSON response.
+5. UI updates state and presents feedback to the user.
 
-### `npm test`
+## `.env` and Git Submission Notes
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+- Do **not** commit real credentials or private keys.
+- Keep sensitive values only in local `.env`.
+- Recommended to commit `Frontend/.env.example` with placeholders.
+- For submission, include setup instructions for required env keys..
