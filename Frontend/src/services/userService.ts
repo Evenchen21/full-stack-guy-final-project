@@ -58,6 +58,7 @@ export function updateUserByAdmin(
     lastName?: string;
     email?: string;
     password?: string;
+    isAdmin?: boolean;
   },
 ) {
   const body: any = {
@@ -69,6 +70,7 @@ export function updateUserByAdmin(
   };
 
   if (updatedUser.password) body.password = updatedUser.password;
+  if (updatedUser.isAdmin !== undefined) body.isAdmin = updatedUser.isAdmin;
 
   return axios.put(`${api}/admin/users/${userId}`, body);
 }

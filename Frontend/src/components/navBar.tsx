@@ -2,12 +2,29 @@ import { FunctionComponent } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { toast } from "react-toastify";
+import { jwtDecode } from "jwt-decode";
 
 interface NavBarProps {}
 
+interface TokenPayload {
+  _id: string;
+  email: string;
+  isAdmin: boolean;
+}
+
 const NavBar: FunctionComponent<NavBarProps> = () => {
-  const { isLoggedIn, logout } = useAuth();
+  const { isLoggedIn, logout, token } = useAuth();
   const navigate = useNavigate();
+
+  let isAdmin = false;
+  if (token) {
+    try {
+      const decoded = jwtDecode<TokenPayload>(token);
+      isAdmin = decoded.isAdmin;
+    } catch (err) {
+      console.error("Invalid token", err);
+    }
+  }
 
   const handleLogout = () => {
     logout();
@@ -37,31 +54,38 @@ const NavBar: FunctionComponent<NavBarProps> = () => {
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
-              <a className="nav-link" href="/Home">
+              <NavLink className="nav-link" to="/Home">
                 Home
-              </a>
+              </NavLink>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="/Recipes">
+              <NavLink className="nav-link" to="/Recipes">
                 Recipes
-              </a>
+              </NavLink>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="/About">
+              <NavLink className="nav-link" to="/About">
                 About us
-              </a>
+              </NavLink>
             </li>
             {isLoggedIn ? (
               <>
                 <li className="nav-item">
-                  <a className="nav-link" href="/Profile">
+                  <NavLink className="nav-link" to="/Profile">
                     User Profile
                     <i className="fa-solid fa-user-gear ms-2"></i>
-                  </a>
+                  </NavLink>
                 </li>
               </>
             ) : (
               <></>
+            )}
+            {isAdmin && (
+              <li className="nav-item">
+                <NavLink className="nav-link" to="/admin/users">
+                  Settings <i className="fa-solid fa-cogs ms-1"></i>
+                </NavLink>
+              </li>
             )}
           </ul>
 

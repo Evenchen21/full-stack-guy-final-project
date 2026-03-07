@@ -9,6 +9,7 @@ import { ToastContainer } from "react-toastify";
 import { AuthProvider } from "./context/AuthContext";
 import AboutPage from "./components/aboutPage";
 import UserProfilePage from "./components/userProfilePage";
+import AdminUsersPage from "./components/AdminUsersPage";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/profile" element={<UserProfilePage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/admin/users" element={<AdminUsersPage />} />
           </Routes>
         </div>
       </AuthProvider>

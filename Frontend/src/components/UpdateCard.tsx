@@ -4,7 +4,6 @@ import * as yup from "yup";
 import { getCardById, updateCard } from "../services/RecipeService";
 import { toast } from "react-toastify";
 import RecipesCard from "../interfaces/RecipesCard";
-import Footer from "./Footer";
 
 interface UpdateCardProps {
   onHide: () => void;

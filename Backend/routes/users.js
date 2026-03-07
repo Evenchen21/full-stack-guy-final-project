@@ -96,7 +96,7 @@ router.post("/login", async (req, res) => {
     const token = jwt.sign(
       { _id: user._id, email: user.email, isAdmin: user.isAdmin },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" },
+      { expiresIn: "4h" }, // ---- Make a logout the session after 4 hours (token expires after 4 hours) --- //
     );
     // Update the user's login status in the DataBase
     user.isLoggedIn = true;
@@ -202,6 +202,50 @@ router.get("/admin/users/:id", adminMiddleware, async (req, res) => {
     res.status(500).send("(X) Internal Server Error (X)");
   }
 });
+
+//-----------------------------------------//
+// ADMIN - Update User //
+router.put("/admin/users/:id", adminMiddleware, async (req, res) => {
+  try {
+    const updateFields = {};
+    // Allow updating basic fields
+    if (req.body.name?.first) updateFields.firstName = req.body.name.first;
+    if (req.body.name?.last) updateFields.lastName = req.body.name.last;
+    if (req.body.email) updateFields.email = req.body.email;
+    if (req.body.password) {
+      const salt = await bcrypt.genSalt(10);
+      updateFields.password = await bcrypt.hash(req.body.password, salt);
+    }
+    // Allow updating admin status
+    if (req.body.isAdmin !== undefined) updateFields.isAdmin = req.body.isAdmin;
+
+    const user = await User.findByIdAndUpdate(
+      req.params.id,
+      { $set: updateFields },
+      { new: true },
+    ).select("-password");
+
+    if (!user) return res.status(404).send("User Not Found!");
+
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(500).send("(X) Internal Server Error (X)");
+  }
+});
+
+//-----------------------------------------//
+// ADMIN - Delete User //
+router.delete("/admin/users/:id", adminMiddleware, async (req, res) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) return res.status(404).send("User Not Found!");
+    res.status(200).send("User Deleted Successfully by Admin!");
+  } catch (err) {
+    res.status(500).send("(X) Internal Server Error (X)");
+  }
+});
+
+module.exports = router;
 
 //-----------------------------------------//
 // ADMIN - Create User //
