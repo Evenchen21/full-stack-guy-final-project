@@ -1,4 +1,4 @@
-# FSProject Final Project Recepies.com
+# Full Stack Project Final - Recepies.com
 
 פרויקט Full Stack לניהול משתמשים וכרטיסי מתכונים.
 
