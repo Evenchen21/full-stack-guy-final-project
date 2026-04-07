@@ -1,154 +1,45 @@
-# FSProject - Full Stack Project
+# FSProject Final Project Recepies.com
 
-## מה הפרויקט הזה עושה?
+פרויקט Full Stack לניהול משתמשים וכרטיסי מתכונים.
 
-זהו פרויקט Full Stack של אתר מתכונים/כרטיסים, שמורכב משני חלקים:
+המערכת בנויה כך שמשתמש יכול להירשם, להתחבר, לנהל פרופיל אישי ולבצע פעולות על כרטיסי תוכן לפי רמת ההרשאה שלו.
 
-1. Frontend
+## סקירה קצרה
 
-- בנוי עם React + TypeScript
-- מציג מסכים למשתמש (התחברות, הרשמה, עמוד בית, פרופיל ועוד)
+- Frontend: אפליקציית React + TypeScript להצגת המערכת למשתמש.
+- Backend: שרת Node.js + Express המספק REST API.
+- Database: MongoDB לניהול נתוני משתמשים וכרטיסים.
 
-2. Backend
+## יכולות מרכזיות
 
-- בנוי עם Node.js + Express
-- מספק API למשתמשים ולכרטיסים
-- מתחבר למסד נתונים MongoDB
+- הרשמה, התחברות ואימות משתמשים עם JWT.
+- ניהול פרופיל משתמש.
+- פעולות CRUD על כרטיסי מתכונים.
+- הרשאות לפי תפקיד (משתמש רגיל / אדמין).
 
-בקיצור:
-ה-Frontend שולח בקשות, ה-Backend מטפל בהן ושומר/קורא מידע מ-MongoDB.
+## איך זה עובד בפועל
 
-## טכנולוגיות עיקריות
+1. המשתמש מבצע פעולה בממשק (למשל התחברות או יצירת כרטיס).
+2. ה-Frontend שולח בקשת API ל-Backend.
+3. ה-Backend מאמת נתונים והרשאות, ומעדכן את מסד הנתונים.
+4. התוצאה חוזרת ל-Frontend ומוצגת למשתמש בזמן אמת.
 
-- Frontend: React, TypeScript, React Router, Axios
-- Backend: Node.js, Express, Mongoose, JWT, Joi
-- Database: MongoDB (לרוב MongoDB Atlas)
+## ארכיטקטורה
 
-## מבנה תיקיות
+- Frontend שולח בקשות HTTP ל-Backend באמצעות Axios.
+- Backend מבצע ולידציה, אימות והרשאות דרך Middleware.
+- הנתונים נשמרים ונשלפים מ-MongoDB דרך Mongoose.
+
+המבנה הזה יוצר הפרדה ברורה בין שכבת התצוגה (Client), הלוגיקה העסקית (Server) ושכבת הנתונים (Database), מה שמקל על תחזוקה והרחבה של הפרויקט.
+
+## מבנה הפרויקט
 
 - Frontend/ - צד לקוח
 - Backend/ - צד שרת
 
-## לפני שמתחילים
-
-צריך מותקן במחשב:
-
-1. Node.js (מומלץ גרסה 18 ומעלה)
-2. npm
-3. חיבור ל-MongoDB
-
-כדי לבדוק גרסאות:
-
-node -v
-npm -v
-
-## הגדרת קבצי סביבה (חשוב מאוד)
-
-יש ליצור קבצי .env מקומיים (לא לדחוף אותם ל-GitHub עם ערכים אמיתיים).
-
-### Backend/.env
-
-דוגמה:
-
-PORT=9000
-DB_HOST=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-
-הסבר קצר:
-
-- PORT - הפורט שבו השרת רץ
-- DB_HOST - כתובת החיבור ל-MongoDB
-- JWT_SECRET - מפתח לחתימת טוקנים
-
-### Frontend/.env
-
-דוגמה:
-
-REACT_APP_API_USERS=http://127.0.0.1:9000/api/users
-REACT_APP_API_CARDS=http://127.0.0.1:9000/api/cards
-
-הסבר קצר:
-
-- אלו הכתובות שאליהן ה-Frontend שולח בקשות
-- שים לב שהפורט כאן חייב להתאים לפורט של ה-Backend
-
-## הרצה מקומית של הפרויקט
-
-צריך לפתוח שני טרמינלים.
-
-### טרמינל 1 - Backend
-
-cd Backend
-npm install
-npm start
-
-### טרמינל 2 - Frontend
-
-cd Frontend
-npm install
-npm start
-
-אחרי זה האתר אמור להיפתח ב:
-
-http://localhost:3000
-
-והשרת אמור לרוץ ב:
-
-http://localhost:9000
-
-## Endpoints עיקריים ב-Backend
+## API עיקרי
 
 - /api/users
 - /api/cards
 
-## תקלות נפוצות ומה לבדוק
-
-1. ה-Frontend עולה אבל אין נתונים
-
-- בדוק שקובץ Frontend/.env מצביע לפורט הנכון
-- בדוק שה-Backend באמת רץ
-
-2. שגיאת התחברות ל-MongoDB
-
-- בדוק ש-DB_HOST תקין
-- בדוק הרשאות/Whitelist ב-Atlas
-
-3. שגיאת Token או הרשאות
-
-- התחבר מחדש כדי לקבל טוקן חדש
-- ודא שנשלחת כותרת Authorization עם Bearer Token
-
-## אבטחה והגשה ל-GitHub
-
-חשוב מאוד:
-
-1. לא מעלים סיסמאות, Secrets, או Connection String אמיתי ל-GitHub.
-2. אם בטעות נחשפו פרטים פרטיים, מחליפים אותם מיד (Rotate) בצד השירותים.
-3. מעלים רק דוגמאות כמו .env.example עם ערכי דמה.
-
-דוגמה ל-.env.example בטוח:
-
-PORT=9000
-DB_HOST=YOUR_MONGODB_CONNECTION_STRING
-JWT_SECRET=YOUR_SECRET
-
-REACT_APP_API_USERS=http://127.0.0.1:9000/api/users
-REACT_APP_API_CARDS=http://127.0.0.1:9000/api/cards
-
-## למי שלא בא מרקע טכני
-
-אם זו הפעם הראשונה שלך עם Full Stack, תעבוד לפי הסדר הבא:
-
-1. תוודא שיש Node.js
-2. תיצור קבצי .env לפי הדוגמאות למעלה
-3. תריץ Backend
-4. תריץ Frontend
-5. תפתח דפדפן על localhost:3000
-
-אם משהו לא עובד, בדרך כלל הבעיה היא באחד משלושה דברים:
-
-1. פורטים לא תואמים
-2. קובץ .env לא נכון
-3. השרת (Backend) לא עלה בהצלחה
-
-בהצלחה.
+נתיבים אלה מרכזים את כל הפעולות הקשורות למשתמשים ולכרטיסים, כולל אימות, שליפה, יצירה, עדכון ומחיקה.
