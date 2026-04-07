@@ -1,8 +1,7 @@
 import axios from "./axios";
 import Card from "../interfaces/RecipesCard";
 
-const api: string =
-  process.env.REACT_APP_API_CARDS || "http://localhost:9000/api/cards";
+const api: string = process.env.REACT_APP_API_CARDS || "";
 
 // get all cards //
 export function getAllCards() {

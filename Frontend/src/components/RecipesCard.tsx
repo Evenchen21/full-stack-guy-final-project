@@ -18,23 +18,30 @@ interface CardInterface {
 }
 
 const RecipesCard: FunctionComponent<RecipesCardProps> = () => {
+  // Holds all recipe cards shown on the page //
   const [cards, setCards] = useState<CardInterface[]>([]);
+  // Controls create/delete/update modal visibility //
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
+  // Stores the selected card IDs for delete/update actions //
   const [selectedCardId, setSelectedCardId] = useState<string>("");
   const [selectedUpdateCardId, setSelectedUpdateCardId] = useState<string>("");
+  // Used to show action icons only for logged-in users //
   const { isLoggedIn } = useAuth();
 
+  // Fetch cards from API and normalize response shape //
   const getCards = useCallback(async () => {
     try {
       const res = await getAllCards();
+      // Supports both array response and { cards: [] } response //
       const cardsData = Array.isArray(res.data)
         ? res.data
         : Array.isArray(res.data?.cards)
           ? res.data.cards
           : [];
 
+      // Convert incoming data into a consistent card object //
       const normalizedCards: CardInterface[] = cardsData.map((item: any) => ({
         _id: String(item._id || item.id),
         title: item.title || "Untitled",
@@ -45,32 +52,32 @@ const RecipesCard: FunctionComponent<RecipesCardProps> = () => {
 
       setCards(normalizedCards);
     } catch (err: any) {
-      console.error(
-        "Cards fetch error:",
-        err?.message,
-        err?.response?.status,
-        err?.config?.url,
-      );
+      // Keep UI stable if request fails //
       setCards([]);
     }
   }, []);
 
+  // Load cards once when component mounts //
   useEffect(() => {
     getCards();
   }, [getCards]);
 
+  // Open delete modal for selected card //
   const openDeleteModal = (cardId: string) => {
     setSelectedCardId(cardId);
     setShowDeleteModal(true);
   };
 
+  // Open update modal for selected card //
   const openUpdateModal = (cardId: string) => {
     setSelectedUpdateCardId(cardId);
     setShowUpdateModal(true);
   };
 
+  // Optimistically toggle like state, then sync with server //
   const toggleLike = async (cardId: string) => {
     let updatedCard: CardInterface | undefined;
+    // Save previous list so we can rollback on error //
     let previousCards: CardInterface[] = [];
 
     setCards((prev) => {
@@ -91,19 +98,19 @@ const RecipesCard: FunctionComponent<RecipesCardProps> = () => {
         imageUrl: updatedCard.imageUrl,
         isLiked: updatedCard.isLiked,
       });
+      // Show success toast based on final like state //
       toast.success(
         updatedCard.isLiked
           ? "Added to favorites ❤️"
           : "Removed from favorites",
       );
     } catch (err: any) {
-      // Revert optimistic update on failure
+      // Revert optimistic update on failure //
       setCards(previousCards);
       if (err?.isAuthError) {
         toast.error("You must be logged in to like a recipe.");
         return;
       }
-      console.error("Like error:", err?.response?.status, err?.message);
       toast.error(
         `Failed to update like status. ${err?.response?.status ? `(${err.response.status})` : ""}`,
       );
@@ -167,12 +174,14 @@ const RecipesCard: FunctionComponent<RecipesCardProps> = () => {
         )}
       </div>
 
+      {/* Create card modal */}
       <CreateCardModal
         show={showCreateModal}
         onHide={() => setShowCreateModal(false)}
         refresh={getCards}
       />
 
+      {/* Delete card modal */}
       <DeleteCardModal
         show={showDeleteModal}
         onHide={() => setShowDeleteModal(false)}
@@ -180,6 +189,7 @@ const RecipesCard: FunctionComponent<RecipesCardProps> = () => {
         refresh={getCards}
       />
 
+      {/* Update card modal */}
       <UpdateCardModal
         show={showUpdateModal}
         onHide={() => setShowUpdateModal(false)}

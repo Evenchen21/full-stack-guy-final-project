@@ -3,27 +3,34 @@ import { FunctionComponent } from "react";
 import { useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
+import { requestPasswordReset } from "../services/userService";
 
 interface ForgotPasswordPageProps {}
 
 const ForgotPasswordPage: FunctionComponent<ForgotPasswordPageProps> = () => {
+  // used to move user to other pages from this screen //
   const navigate = useNavigate();
 
+  // Formik manages input state, validation, and submit handling //
   const formik = useFormik({
+    // initial value for the form field //
     initialValues: {
       email: "",
     },
+    // validation rules for the email input //
     validationSchema: Yup.object({
       email: Yup.string()
         .email("Invalid email address")
         .required("Email is required"),
     }),
+    // submit request to backend to send reset email //
     onSubmit: async (values) => {
       try {
-        console.log("Forgot password payload", values);
+        await requestPasswordReset(values.email);
+        // success feedback after request is accepted //
         toast.success("Reset link sent! Please check your email.");
-        navigate("/login");
       } catch (error) {
+        // fallback error message if request fails //
         toast.error("Failed to send reset link. Please try again.");
       }
     },
@@ -65,6 +72,7 @@ const ForgotPasswordPage: FunctionComponent<ForgotPasswordPageProps> = () => {
               </div>
               <div className="col-12 col-md-6">
                 <div className="card-body p-3 p-md-4 p-xl-5">
+                  {/* right side contains the forgot-password form // */}
                   <div className="row">
                     <div className="col-12">
                       <div className="mb-5">
@@ -72,6 +80,7 @@ const ForgotPasswordPage: FunctionComponent<ForgotPasswordPageProps> = () => {
                       </div>
                     </div>
                   </div>
+                  {/* main form section with validation messages // */}
                   <form onSubmit={formik.handleSubmit}>
                     <div className="row gy-3 gy-md-4 overflow-hidden">
                       <div className="col-12">
@@ -127,6 +136,7 @@ const ForgotPasswordPage: FunctionComponent<ForgotPasswordPageProps> = () => {
                       </div>
                     </div>
                   </form>
+                  {/* quick links to login/register pages // */}
                   <div className="row">
                     <div className="col-12">
                       <hr className="mt-5 mb-4 border-secondary-subtle" />

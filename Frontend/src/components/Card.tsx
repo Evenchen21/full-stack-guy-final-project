@@ -7,17 +7,21 @@ import NavBar from "./navBar";
 interface CardProps {}
 
 const Cart: FunctionComponent<CardProps> = () => {
+  // Holds the list of recipe cards fetched from the server //
   const [cards, setCards] = useState<CardInterface[]>([]);
 
+  // Fetch all cards once when the component first mounts //
   useEffect(() => {
     getAllCards()
       .then((res: any) => {
+        // Handle both flat array and nested { cards: [] } response shapes //
         const cardsData = Array.isArray(res.data)
           ? res.data
           : Array.isArray(res.data?.cards)
             ? res.data.cards
             : [];
 
+        // Normalize each item to a consistent shape regardless of API differences //
         const normalizedCards: CardInterface[] = cardsData.map((item: any) => ({
           _id: item._id,
           id: item.id,
@@ -30,6 +34,7 @@ const Cart: FunctionComponent<CardProps> = () => {
         setCards(normalizedCards);
       })
       .catch(() => {
+        // On any error just render an empty list so the page doesn't crash //
         setCards([]);
       });
   }, []);
@@ -44,6 +49,7 @@ const Cart: FunctionComponent<CardProps> = () => {
             {cards.map((cardItem: CardInterface) => (
               <div
                 className="col-md-4 mb-4"
+                // Use _id if available, fall back to id for older API responses //
                 key={String(cardItem._id || cardItem.id)}
               >
                 <Card className="h-100 shadow">
@@ -74,7 +80,7 @@ const Cart: FunctionComponent<CardProps> = () => {
             ))}
           </div>
         ) : (
-          <p className="text-center">No info in cards received by server</p>
+          <p className="text-center">Server Error..</p>
         )}
       </div>
     </>

@@ -10,9 +10,8 @@ import { useAuth } from "../context/AuthContext";
 interface LoginPageProps {}
 
 const LoginPage: FunctionComponent<LoginPageProps> = () => {
-  const navigate = useNavigate(); // Get the login function from the authentication context
-  const { login } = useAuth(); // Initialize Formik for form handling and validation
-
+  const navigate = useNavigate();
+  const { login } = useAuth();
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -38,7 +37,6 @@ const LoginPage: FunctionComponent<LoginPageProps> = () => {
         navigate("/");
       } catch (error) {
         toast.error("Login failed. Please check your email and password.");
-        console.error("Login failed:", error);
       }
     },
   });

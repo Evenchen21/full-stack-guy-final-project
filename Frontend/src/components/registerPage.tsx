@@ -8,8 +8,11 @@ import { addUser } from "../services/userService";
 interface RegisterPageProps {}
 
 const RegisterPage: FunctionComponent<RegisterPageProps> = () => {
+  // Used to redirect user after register or when clicking navigation links //
   const navigate = useNavigate();
+  // Formik handles form state, validation and submit flow //
   const formik = useFormik({
+    // Initial values for every input field in the form //
     initialValues: {
       firstName: "",
       lastName: "",
@@ -18,6 +21,7 @@ const RegisterPage: FunctionComponent<RegisterPageProps> = () => {
       confirmPassword: "",
       terms: false,
     },
+    // Validation rules for each form field //
     validationSchema: Yup.object({
       firstName: Yup.string().required("First name is required"),
       lastName: Yup.string().required("Last name is required"),
@@ -35,8 +39,10 @@ const RegisterPage: FunctionComponent<RegisterPageProps> = () => {
         "You must accept the terms and conditions",
       ),
     }),
+    // Called only when form passes validation //
     onSubmit: async (values) => {
       try {
+        // Create new user account through backend API //
         await addUser({
           id: 0,
           firstName: values.firstName,
@@ -44,9 +50,11 @@ const RegisterPage: FunctionComponent<RegisterPageProps> = () => {
           email: values.email,
           password: values.password,
         });
+        // Show success message and move user to login page //
         toast.success("Account created successfully! Please log in.");
         navigate("/login");
       } catch (error: any) {
+        // Show backend error message if available, otherwise fallback text //
         const msg =
           error?.response?.data ||
           "Failed to create account. Please try again.";
@@ -91,6 +99,7 @@ const RegisterPage: FunctionComponent<RegisterPageProps> = () => {
               </div>
               <div className="col-12 col-md-6">
                 <div className="card-body p-3 p-md-4 p-xl-5">
+                  {/* Right side contains the registration form */}
                   <div className="row">
                     <div className="col-12">
                       <div className="mb-5">
@@ -98,6 +107,7 @@ const RegisterPage: FunctionComponent<RegisterPageProps> = () => {
                       </div>
                     </div>
                   </div>
+                  {/* Form fields and validation messages */}
                   <form onSubmit={formik.handleSubmit}>
                     <div className="row gy-3 gy-md-4 overflow-hidden">
                       <div className="col-12 col-md-6">
@@ -266,6 +276,7 @@ const RegisterPage: FunctionComponent<RegisterPageProps> = () => {
                       </div>
                     </div>
                   </form>
+                  {/* Secondary link for users who already have an account */}
                   <div className="row">
                     <div className="col-12">
                       <hr className="mt-5 mb-4 border-secondary-subtle" />

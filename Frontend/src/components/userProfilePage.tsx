@@ -32,34 +32,47 @@ interface AdminUserInterface {
 }
 
 const UserProfilePage: FunctionComponent<UserProfilePageProps> = () => {
+  // Logged-in user id from auth context //
   const { userId } = useAuth();
+  // Route location used to re-run loading when navigation changes //
   const location = useLocation();
+  // Hidden file input ref for profile image picker //
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Profile image is persisted in localStorage //
   const [profileImg, setProfileImg] = useState<string>(
     localStorage.getItem("profileImg") || "",
   );
+  // Basic profile info shown in the card //
   const [user, setUser] = useState<{
     firstName: string;
     lastName: string;
     email: string;
   } | null>(null);
+  // Cards marked as liked/favorites //
   const [likedCards, setLikedCards] = useState<CardInterface[]>([]);
+  // Toggles profile edit mode //
   const [editMode, setEditMode] = useState(false);
+  // Editable fields for profile update //
   const [editValues, setEditValues] = useState({
     firstName: "",
     lastName: "",
     email: "",
   });
+  // Toggles password panel visibility //
   const [pwMode, setPwMode] = useState(false);
+  // Password form values //
   const [pwValues, setPwValues] = useState({
     current: "",
     next: "",
     confirm: "",
   });
+  // Password panel feedback messages //
   const [pwError, setPwError] = useState("");
   const [pwSuccess, setPwSuccess] = useState("");
+  // Whether current user is admin //
   const [isAdmin, setIsAdmin] = useState(false);
+  // Admin table state //
   const [adminUsers, setAdminUsers] = useState<AdminUserInterface[]>([]);
   const [editingAdminUserId, setEditingAdminUserId] = useState<string>("");
   const [adminEditValues, setAdminEditValues] = useState({
@@ -68,6 +81,7 @@ const UserProfilePage: FunctionComponent<UserProfilePageProps> = () => {
     email: "",
   });
 
+  // Load all users for admin table //
   const loadAdminUsers = async () => {
     try {
       const res = await getAllUsersAdmin();
@@ -85,7 +99,9 @@ const UserProfilePage: FunctionComponent<UserProfilePageProps> = () => {
     }
   };
 
+  // Main data-loading effect for profile, liked cards, and admin state //
   useEffect(() => {
+    // Decode token to detect admin privileges //
     try {
       const token = localStorage.getItem("token");
       if (token) {
@@ -98,6 +114,7 @@ const UserProfilePage: FunctionComponent<UserProfilePageProps> = () => {
       setIsAdmin(false);
     }
 
+    // Load current user profile //
     if (!userId) return;
     getUserById()
       .then((res: any) => {
@@ -115,6 +132,7 @@ const UserProfilePage: FunctionComponent<UserProfilePageProps> = () => {
       })
       .catch(() => {});
 
+    // Load cards and keep only liked ones //
     getAllCards()
       .then((res: any) => {
         const all: CardInterface[] = (
@@ -134,6 +152,7 @@ const UserProfilePage: FunctionComponent<UserProfilePageProps> = () => {
       })
       .catch(() => {});
 
+    // If admin, also load users list //
     if (localStorage.getItem("token")) {
       try {
         const decoded: { isAdmin?: boolean } = jwtDecode(
@@ -146,6 +165,7 @@ const UserProfilePage: FunctionComponent<UserProfilePageProps> = () => {
     }
   }, [userId, location]);
 
+  // Start inline edit for selected admin user //
   const startAdminEdit = (adminUser: AdminUserInterface) => {
     setEditingAdminUserId(adminUser._id);
     setAdminEditValues({
@@ -155,6 +175,7 @@ const UserProfilePage: FunctionComponent<UserProfilePageProps> = () => {
     });
   };
 
+  // Save admin user's edited data //
   const saveAdminEdit = async () => {
     if (!editingAdminUserId) return;
 
@@ -172,6 +193,7 @@ const UserProfilePage: FunctionComponent<UserProfilePageProps> = () => {
     }
   };
 
+  // Delete a user from admin table after confirmation //
   const removeAdminUser = async (adminUserId: string) => {
     const ok = window.confirm("Delete this user?");
     if (!ok) return;
@@ -185,6 +207,7 @@ const UserProfilePage: FunctionComponent<UserProfilePageProps> = () => {
     }
   };
 
+  // Handle profile image upload and compress before storing //
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -214,6 +237,7 @@ const UserProfilePage: FunctionComponent<UserProfilePageProps> = () => {
     reader.readAsDataURL(file);
   };
 
+  // Save edited profile fields to backend and refresh local state //
   const handleEditSave = async () => {
     try {
       const uid = localStorage.getItem("userId") || "";
@@ -224,7 +248,7 @@ const UserProfilePage: FunctionComponent<UserProfilePageProps> = () => {
         email: editValues.email,
         password: "",
       });
-      // Re-fetch from server to confirm the saved data
+      // Re-fetch from server to confirm the saved data //
       const res = await getUserById();
       const u = res.data;
       const updated = {
@@ -241,6 +265,7 @@ const UserProfilePage: FunctionComponent<UserProfilePageProps> = () => {
     }
   };
 
+  // Validate and simulate password change feedback in UI //
   const handlePasswordSave = () => {
     setPwError("");
     setPwSuccess("");
@@ -274,7 +299,7 @@ const UserProfilePage: FunctionComponent<UserProfilePageProps> = () => {
         >
           My Profile
         </h2>
-        {/* Profile card */}
+        {/* Profile card section // */}
         <div
           className="card shadow mx-auto mb-5"
           style={{
@@ -511,7 +536,7 @@ const UserProfilePage: FunctionComponent<UserProfilePageProps> = () => {
           </div>
         </div>
 
-        {/* Liked recipes */}
+        {/* Liked recipes section // */}
         <h4 className="fw-bold mb-4 text-center" style={{ color: "#5F9598" }}>
           <i className="fa-solid fa-heart text-danger me-2"></i>My Favorite
           Recipes
@@ -552,6 +577,7 @@ const UserProfilePage: FunctionComponent<UserProfilePageProps> = () => {
           </p>
         )}
 
+        {/* Admin users management table // */}
         {isAdmin && (
           <div className="mt-5">
             <h4

@@ -6,6 +6,7 @@ import { jwtDecode } from "jwt-decode";
 
 interface NavBarProps {}
 
+// expected fields we read from the JWT token //
 interface TokenPayload {
   _id: string;
   email: string;
@@ -13,19 +14,22 @@ interface TokenPayload {
 }
 
 const NavBar: FunctionComponent<NavBarProps> = () => {
+  // auth state and actions from global auth context //
   const { isLoggedIn, logout, token } = useAuth();
+  // used to navigate user after logout //
   const navigate = useNavigate();
 
+  // controls whether to show admin-only navigation link //
   let isAdmin = false;
   if (token) {
     try {
+      // decode token to check admin role //
       const decoded = jwtDecode<TokenPayload>(token);
       isAdmin = decoded.isAdmin;
-    } catch (err) {
-      console.error("Invalid token", err);
-    }
+    } catch {}
   }
 
+  // clear auth data, show message, then redirect to login //
   const handleLogout = () => {
     logout();
     toast.success("You have logged out.. see you!");
@@ -52,6 +56,7 @@ const NavBar: FunctionComponent<NavBarProps> = () => {
           <span className="navbar-toggler-icon"></span>
         </button>
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
+          {/* main navigation links shown on the left // */}
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
               <NavLink className="nav-link" to="/Home">
@@ -89,6 +94,7 @@ const NavBar: FunctionComponent<NavBarProps> = () => {
             )}
           </ul>
 
+          {/* auth actions shown on the right // */}
           <ul className="navbar-nav ms-auto mb-2 mb-lg-0 ml-10">
             {isLoggedIn ? (
               <li className="nav-item">
@@ -115,6 +121,7 @@ const NavBar: FunctionComponent<NavBarProps> = () => {
             )}
           </ul>
 
+          {/* search bar UI (no search logic connected yet) // */}
           <form className="d-flex" role="search">
             <input
               className="form-control me-2"

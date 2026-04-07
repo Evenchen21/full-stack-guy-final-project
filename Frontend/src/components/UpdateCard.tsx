@@ -16,6 +16,7 @@ const UpdateCard: FunctionComponent<UpdateCardProps> = ({
   cardId,
   refresh,
 }) => {
+  // Holds form values loaded from the selected card //
   const [initialValues, setInitialValues] = useState<RecipesCard>({
     title: "",
     description: "",
@@ -23,27 +24,35 @@ const UpdateCard: FunctionComponent<UpdateCardProps> = ({
     isLiked: false,
   });
 
+  // Formik manages field state, validation and submit flow //
   const formik = useFormik({
+    // Start form with values from state //
     initialValues,
+    // Rebuild form values when initialValues changes after API load //
     enableReinitialize: true,
+    // Validation rules for each editable field //
     validationSchema: yup.object({
       title: yup.string().required().min(2),
       description: yup.string().required().min(10),
       imageUrl: yup.string().required().url(),
       isLiked: yup.boolean(),
     }),
+    // Submit updated card data to API //
     onSubmit: async (values) => {
       try {
         await updateCard(cardId, values);
+        // Success: show message, refresh parent list, close modal //
         toast.success("Recipe updated ");
         refresh();
         onHide();
       } catch (err: any) {
+        // Auth-related error gets a specific message //
         if (err?.isAuthError) {
           toast.error("You must be logged in to update a recipe.");
           return;
         }
 
+        // Build a helpful fallback message for other API errors //
         const status = err?.response?.status;
         const apiMessage = err?.response?.data;
         const fallback = err?.message || "Failed to update recipe";
@@ -54,12 +63,14 @@ const UpdateCard: FunctionComponent<UpdateCardProps> = ({
     },
   });
 
+  // Load current card data whenever cardId changes //
   useEffect(() => {
     if (!cardId) return;
 
     getCardById(cardId)
       .then((res: any) => {
         const card = res.data || {};
+        // Normalize API data into form-friendly shape //
         setInitialValues({
           id: card.id,
           _id: card._id,
@@ -70,6 +81,7 @@ const UpdateCard: FunctionComponent<UpdateCardProps> = ({
         });
       })
       .catch(() => {
+        // Inform user if card details could not be loaded //
         toast.error("Could not load recipe details");
       });
   }, [cardId]);
@@ -147,6 +159,7 @@ const UpdateCard: FunctionComponent<UpdateCardProps> = ({
             className="btn btn-outline-danger flex-fill"
             type="button"
             onClick={() => {
+              // Reset local edits and close modal without saving //
               formik.resetForm();
               onHide();
             }}

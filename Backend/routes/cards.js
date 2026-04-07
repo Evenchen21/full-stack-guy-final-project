@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
+const Joi = require("joi");
 const Card = require("../models/card");
+const User = require("../models/users");
 const adminMiddleware = require("../middlewares/adminMiddleware");
 const authMiddleware = require("../middlewares/auth");
-const Joi = require("joi");
-const User = require("../models/users");
 
 //-----------------------------------------//
 // Validation Schema //
@@ -36,6 +36,7 @@ router.get("/", async (req, res) => {
   }
 });
 
+//-----------------------------------------//
 // Get Card By ID //
 
 router.get("/:id", async (req, res) => {
@@ -54,15 +55,7 @@ router.get("/:id", async (req, res) => {
 router.post("/", authMiddleware, async (req, res) => {
   try {
     const { error } = cardSchema.validate(req.body, { allowUnknown: true });
-    if (error) {
-      console.error(
-        "Card create validation error:",
-        error.details[0].message,
-        "| body:",
-        JSON.stringify(req.body),
-      );
-      return res.status(400).send(error.details[0].message);
-    }
+    if (error) return res.status(400).send(error.details[0].message);
 
     const newCard = new Card({
       title: req.body.title,
@@ -74,7 +67,6 @@ router.post("/", authMiddleware, async (req, res) => {
     await newCard.save();
     res.status(201).json(newCard);
   } catch (err) {
-    console.error("Card create error:", err.message);
     res.status(500).send("Server Error");
   }
 });

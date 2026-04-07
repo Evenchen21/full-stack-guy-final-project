@@ -8,18 +8,21 @@ import {
 } from "../services/userService";
 import User from "../interfaces/User";
 
-// Helper interface to match MongoDB response structure
+// Helper interface to match MongoDB response structure //
 interface UserData extends Omit<User, "id"> {
   _id: string;
 }
 
 const AdminUsersPage = () => {
+  // List of all users loaded from the server //
   const [users, setUsers] = useState<UserData[]>([]);
+  // Controls visibility of the edit and create modals //
   const [showEditModal, setShowEditModal] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  // Holds the user currently being edited //
   const [editingUser, setEditingUser] = useState<UserData | null>(null);
 
-  // Form state
+  // Shared form state used by both the edit and create modals //
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -28,10 +31,12 @@ const AdminUsersPage = () => {
     isAdmin: false,
   });
 
+  // Fetch users once when the component first mounts //
   useEffect(() => {
     fetchUsers();
   }, []);
 
+  // Load all users from the admin API and store them in state //
   const fetchUsers = async () => {
     try {
       const res = await getAllUsersAdmin();
@@ -41,30 +46,33 @@ const AdminUsersPage = () => {
     }
   };
 
+  // Ask for confirmation before permanently deleting a user //
   const handleDelete = async (userId: string) => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       try {
         await deleteUserByAdmin(userId);
-        toast.success("User deleted successfully");
+        toast.success("User deleted successfully (V)");
         fetchUsers();
       } catch (err) {
-        toast.error("Failed to delete user");
+        toast.error("Failed to delete user (X)");
       }
     }
   };
 
+  // Pre-fill the form with the selected user's data and open the edit modal //
   const handleEditClick = (user: UserData) => {
     setEditingUser(user);
     setFormData({
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
-      password: "", // Reset password field
+      password: "", // Reset password field so we don't accidentally overwrite it //
       isAdmin: user.isAdmin || false,
     });
     setShowEditModal(true);
   };
 
+  // Clear the form and open the create modal //
   const handleCreateClick = () => {
     setFormData({
       firstName: "",
@@ -76,6 +84,7 @@ const AdminUsersPage = () => {
     setShowCreateModal(true);
   };
 
+  // Submit the create form; admin role cannot be set at creation time via the current API //
   const handleCreate = async () => {
     try {
       await import("../services/userService").then((service) =>
@@ -99,6 +108,7 @@ const AdminUsersPage = () => {
     }
   };
 
+  // Submit the edit form; password is sent only if the admin typed a new one //
   const handleUpdate = async () => {
     if (!editingUser) return;
     try {
@@ -106,7 +116,7 @@ const AdminUsersPage = () => {
         firstName: formData.firstName,
         lastName: formData.lastName,
         email: formData.email,
-        password: formData.password || undefined,
+        password: formData.password || undefined, // Omit password if field was left empty //
         isAdmin: formData.isAdmin,
       });
       toast.success("User updated successfully");

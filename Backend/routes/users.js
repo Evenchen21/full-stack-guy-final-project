@@ -6,6 +6,7 @@ const adminMiddleware = require("../middlewares/adminMiddleware");
 const router = express.Router();
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
 const Joi = require("joi");
 
 //-----------------------------------------//
@@ -39,23 +40,51 @@ const editProfileSchema = Joi.object({
   profileImage: Joi.string().uri(),
 });
 
+const forgotPasswordSchema = Joi.object({
+  email: Joi.string().email().min(2).max(100).required(),
+});
+
+const resetPasswordSchema = Joi.object({
+  token: Joi.string().required(),
+  password: Joi.string().min(6).max(1024).required(),
+});
+
+const createMailerTransporter = () => {
+  const host = process.env.SMTP_HOST;
+  const port = Number(process.env.SMTP_PORT || 587);
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+
+  if (host && user && pass) {
+    return nodemailer.createTransport({
+      host,
+      port,
+      secure: port === 465,
+      auth: { user, pass },
+    });
+  }
+
+  // Fallback transport for development when SMTP credentials are not configured.
+  return nodemailer.createTransport({ jsonTransport: true });
+};
+
 //-----------------------------------------//
 // Register New User //
 
 router.post("/register", async (req, res) => {
   try {
-    // Validate the request body
+    // Validate the request body //
     const { error } = registrationSchema.validate(req.body);
     if (error) return res.status(400).send(error.details[0].message);
 
-    // Check if user already exists in the DataBase
+    // Check if user already exists in the DataBase //
     let user = await User.findOne({ email: req.body.email });
     if (user) return res.status(400).send("User Already Registered!");
 
-    // Hash/Encrypt the password
+    // Hash/Encrypt the password //
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
-    // Create a new user
+    // Create a new user //
     user = new User({
       firstName: req.body.name?.first || "",
       lastName: req.body.name?.last || "",
@@ -63,7 +92,7 @@ router.post("/register", async (req, res) => {
       password: hashedPassword,
       profileImage: req.body.profileImage || "",
     });
-    // Save the user to the DataBase
+    // Save the user to the DataBase //
     await user.save();
     res.status(201).send("User Registered !");
   } catch (err) {
@@ -109,6 +138,81 @@ router.post("/login", async (req, res) => {
 });
 
 //-----------------------------------------//
+// Forgot Password //
+
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { error } = forgotPasswordSchema.validate(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
+
+    const user = await User.findOne({ email: req.body.email });
+    const genericResponse = {
+      message: "If this email exists, a reset link has been sent.",
+    };
+
+    if (!user) return res.status(200).json(genericResponse);
+
+    const token = jwt.sign(
+      {
+        _id: user._id,
+        email: user.email,
+        purpose: "password-reset",
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" },
+    );
+
+    const frontendBase = process.env.FRONTEND_URL || "http://localhost:3000";
+    const resetUrl = `${frontendBase}/reset-password?token=${token}`;
+
+    const transporter = createMailerTransporter();
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM || "no-reply@mycookbook.local",
+      to: user.email,
+      subject: "Reset your password",
+      text: `Click this link to reset your password: ${resetUrl}`,
+      html: `<p>Click this link to reset your password:</p><p><a href="${resetUrl}">${resetUrl}</a></p>`,
+    });
+
+    return res.status(200).json(genericResponse);
+  } catch (err) {
+    return res.status(500).send("(X) Internal Server Error (X)");
+  }
+});
+
+//-----------------------------------------//
+// Reset Password //
+
+router.post("/reset-password", async (req, res) => {
+  try {
+    const { error } = resetPasswordSchema.validate(req.body);
+    if (error) return res.status(400).send(error.details[0].message);
+
+    let decoded;
+    try {
+      decoded = jwt.verify(req.body.token, process.env.JWT_SECRET);
+    } catch {
+      return res.status(400).send("Invalid or expired reset token.");
+    }
+
+    if (decoded.purpose !== "password-reset") {
+      return res.status(400).send("Invalid reset token.");
+    }
+
+    const user = await User.findById(decoded._id);
+    if (!user) return res.status(404).send("User Not Found!");
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(req.body.password, salt);
+    await user.save();
+
+    return res.status(200).json({ message: "Password updated successfully." });
+  } catch (err) {
+    return res.status(500).send("(X) Internal Server Error (X)");
+  }
+});
+
+//-----------------------------------------//
 // Get User By ID //
 
 router.get("/:id", authMiddleware, async (req, res) => {
@@ -133,7 +237,7 @@ router.put("/:id", authMiddleware, async (req, res) => {
     if (req.user._id !== req.params.id) {
       return res
         .status(403)
-        .send("Access denied. You can only edit your own profile.");
+        .send("Access denied!, You can only edit your own profile..");
     }
     const updateFields = {};
     if (req.body.name?.first) updateFields.firstName = req.body.name.first;
@@ -205,10 +309,11 @@ router.get("/admin/users/:id", adminMiddleware, async (req, res) => {
 
 //-----------------------------------------//
 // ADMIN - Update User //
+
 router.put("/admin/users/:id", adminMiddleware, async (req, res) => {
   try {
     const updateFields = {};
-    // Allow updating basic fields
+    // Allow updating basic fields //
     if (req.body.name?.first) updateFields.firstName = req.body.name.first;
     if (req.body.name?.last) updateFields.lastName = req.body.name.last;
     if (req.body.email) updateFields.email = req.body.email;
@@ -216,7 +321,7 @@ router.put("/admin/users/:id", adminMiddleware, async (req, res) => {
       const salt = await bcrypt.genSalt(10);
       updateFields.password = await bcrypt.hash(req.body.password, salt);
     }
-    // Allow updating admin status
+    // Allow updating admin status //
     if (req.body.isAdmin !== undefined) updateFields.isAdmin = req.body.isAdmin;
 
     const user = await User.findByIdAndUpdate(
@@ -235,6 +340,7 @@ router.put("/admin/users/:id", adminMiddleware, async (req, res) => {
 
 //-----------------------------------------//
 // ADMIN - Delete User //
+
 router.delete("/admin/users/:id", adminMiddleware, async (req, res) => {
   try {
     const user = await User.findByIdAndDelete(req.params.id);

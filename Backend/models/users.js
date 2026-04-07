@@ -1,4 +1,4 @@
-// models/users.js
+// Users Model //
 const mongoose = require("mongoose");
 
 //User Schema
@@ -9,7 +9,7 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
     minlength: 2,
-    maxlength: 100,
+    maxlength: 125,
     unique: true,
   },
   password: { type: String, required: true, minlength: 6, maxlength: 1024 },

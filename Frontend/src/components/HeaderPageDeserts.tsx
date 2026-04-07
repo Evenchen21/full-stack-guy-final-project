@@ -8,35 +8,41 @@ import CreateCardModal from "./CreateCardModal";
 interface HeaderPageDesertsProps {}
 
 const HeaderPageDeserts: FunctionComponent<HeaderPageDesertsProps> = () => {
+  // Check if the user is logged in to show/hide edit and add controls //
   const { isLoggedIn } = useAuth();
+  // List of dessert cards fetched from the server //
   const [desserts, setDesserts] = useState<RecipesCard[]>([]);
+  // Controls visibility of the add-new-dessert modal //
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  // State for editing
+  // Tracks which card is currently being edited inline (by its _id) //
   const [editingId, setEditingId] = useState<string | null>(null);
+  // Holds a working copy of the card being edited so changes don't affect the list until saved //
   const [editingDessert, setEditingDessert] = useState<RecipesCard | null>(
     null,
   );
 
+  // Fetch all cards and keep only the ones categorised as "Dessert" //
   const fetchDesserts = async () => {
     try {
       const result = await getAllCards();
       const allCards: RecipesCard[] = result.data;
-      // Filter for desserts
+      // Filter for desserts //
       const dessertCards = allCards.filter(
         (card) => card.category === "Dessert",
       );
       setDesserts(dessertCards);
     } catch (err) {
-      console.error(err);
       toast.error("Failed to load desserts");
     }
   };
 
+  // Load desserts once when the component first mounts //
   useEffect(() => {
     fetchDesserts();
   }, []);
 
+  // Ask for confirmation then delete the dessert and refresh the list //
   const handleRemoveDessert = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this dessert?")) {
       try {
@@ -49,6 +55,7 @@ const HeaderPageDeserts: FunctionComponent<HeaderPageDesertsProps> = () => {
     }
   };
 
+  // Toggle the like status of a dessert and refresh the list //
   const handleToggleLike = async (card: RecipesCard) => {
     if (!card._id) return;
     try {
@@ -59,17 +66,20 @@ const HeaderPageDeserts: FunctionComponent<HeaderPageDesertsProps> = () => {
     }
   };
 
+  // Enter inline-edit mode for a card by storing its id and a copy of its data //
   const startEdit = (card: RecipesCard) => {
     if (!card._id) return;
     setEditingId(card._id);
     setEditingDessert(card);
   };
 
+  // Exit inline-edit mode without saving //
   const cancelEdit = () => {
     setEditingId(null);
     setEditingDessert(null);
   };
 
+  // Save the edited dessert to the server, then exit edit mode and refresh //
   const saveEdit = async () => {
     if (!editingDessert || !editingDessert._id) return;
     try {
@@ -89,6 +99,7 @@ const HeaderPageDeserts: FunctionComponent<HeaderPageDesertsProps> = () => {
         Sweet Desserts 🍰
       </h4>
 
+      {/* Show the add-dessert banner only to logged-in users */}
       {isLoggedIn && (
         <div
           className="p-4 rounded-3 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4"
@@ -138,6 +149,7 @@ const HeaderPageDeserts: FunctionComponent<HeaderPageDesertsProps> = () => {
                 overflow: "hidden",
               }}
             >
+              {/* If this card is being edited, show the inline edit form; otherwise show the normal card view */}
               {editingId === dessert._id && editingDessert ? (
                 <div className="p-3">
                   <input
@@ -217,6 +229,7 @@ const HeaderPageDeserts: FunctionComponent<HeaderPageDesertsProps> = () => {
                       {dessert.description}
                     </p>
                   </div>
+                  {/* Show like, edit and delete icons only to logged-in users */}
                   {isLoggedIn && (
                     <div
                       className="card-footer border-0 d-flex justify-content-end align-items-center gap-3 px-4 pb-3"

@@ -69,10 +69,11 @@ const AboutPage: FunctionComponent<AboutPageProps> = () => {
                 style={{ color: "#061E29", lineHeight: "1.8" }}
               >
                 Hi! I'm Guy, a passionate full stack developer and Cyber
-                Security enthusiast who loves building clean, user-friendly web
-                applications. This Recipes app is my final project — a place to
-                discover, share, and save the meals you love. I enjoy working
-                with React, Node.js, and MongoDB to bring ideas to life.
+                Security enthusiast and IT professional, who loves building
+                clean, user-friendly web applications. This Recipes app is my
+                final project — a place to discover, share, and save the meals
+                you love. I enjoy working with React, Node.js, and MongoDB to
+                bring ideas to life.
               </p>
 
               <hr style={{ borderColor: "#5F9598", opacity: 0.4 }} />

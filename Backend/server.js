@@ -62,14 +62,8 @@ app.use((req, res, next) => {
 
 mongoose
   .connect(process.env.DB_HOST)
-  .then(() => {
-    console.log("Connected to DataBase 👌");
-  })
-  .catch((err) => {
-    console.log("Error connecting to DataBase X");
-  });
+  .then(() => {})
+  .catch(() => {});
 
 // Start the server
-app.listen(port, () => {
-  console.log(` Server is - running 👌 `);
-});
+app.listen(port);
